@@ -64,57 +64,6 @@ for (const file of commandFiles) {
 }
 // -----------------------------------------------------------------------
 
-// Define configuration options for the Twitch client
-const opts = {
-  identity: {
-    username: botUsername,
-    password: botPassword,
-  },
-  channels: ["skeegan123"],
-  reconnectInterval: 5000,
-};
-
-console.log("Connecting to Twitch...");
-
-// Create a client with our options
-var twitchClient = new tmi.client(opts);
-
-// Connect to Twitch:
-try {
-  twitchClient.connect();
-} catch (err) {
-  console.log("Error: " + err);
-}
-
-// Ping the Twitch server every 5 minutes to avoid being disconnected
-setInterval(() => {
-  twitchClient
-    .ping()
-    .then((data) => {
-      console.log("Ping: " + data);
-    })
-    .catch((err) => {
-      console.log("Error: " + err);
-    });
-}, 300000);
-
-
-// When the twitch client connects, run this code
-twitchClient.on("connecting", async (address, port) => {
-  await checkTwitchToken();
-});
-
-// When the twitch client connects, log the address and port to the console
-twitchClient.on("connected", (address, port) => {
-  console.log(`* Connected to ${address}:${port}`);
-});
-
-// attach the twitch client to the discord client so I can access it in command files
-client.twitchClient = twitchClient;
-
-// Log in to Discord with your client's token
-client.login(token);
-
 // Simple delay function
 function delay(time) {
   return new Promise((resolve) => setTimeout(resolve, time));
@@ -136,7 +85,7 @@ async function checkTwitchToken() {
     },
   };
 
-  https
+  await https
     .get(getOptions, (response) => {
       const { statusCode } = response;
       const contentType = response.headers["content-type"];
@@ -234,3 +183,61 @@ async function checkTwitchToken() {
       console.error(`Got error: ${e.message}`);
     });
 }
+
+try {
+  checkTwitchToken();
+} catch (e) {
+  console.log("1" + e);
+}
+
+// When the twitch client connects, run this code
+// twitchClient.on("connecting", async (address, port) => {
+//   await checkTwitchToken();
+// });
+
+// Define configuration options for the Twitch client
+const opts = {
+  identity: {
+    username: botUsername,
+    password: botPassword,
+  },
+  channels: ["skeegan123"],
+  reconnectInterval: 5000,
+};
+
+console.log("Connecting to Twitch...");
+
+// Create a client with our options
+var twitchClient = new tmi.client(opts);
+
+// When the twitch client connects, log the address and port to the console
+twitchClient.on("connected", (address, port) => {
+  console.log(`* Connected to ${address}:${port}`);
+});
+
+// Connect to Twitch:
+twitchClient
+  .connect()
+  .then(() => {
+    console.log("Connected to Twitch!");
+    // Ping the Twitch server every 5 minutes to avoid being disconnected
+    setInterval(() => {
+      twitchClient
+        .ping()
+        .then((data) => {
+          console.log("Ping: " + data);
+        })
+        .catch((err) => {
+          console.log("Error: " + err);
+        });
+    }, 300000);
+  })
+  .catch((err) => {
+    console.log("Error connecting to Twitch: " + err);
+  });
+
+// attach the twitch client to the discord client so I can access it in command files
+client.twitchClient = twitchClient;
+
+// Log in to Discord with your client's token
+client.login(token);
