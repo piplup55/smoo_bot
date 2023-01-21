@@ -72,7 +72,7 @@ function delay(time) {
 // Check if the access token is valid, if not, create a new one
 // Mainly just a GET request to https://id.twitch.tv/oauth2/validate to check if the token is valid
 // If it is not, sends a POST request to https://id.twitch.tv/oauth2/token to get a new access token
-async function checkTwitchToken() {
+function checkTwitchToken() {
   // Replace YOUR_ACCESS_TOKEN with the actual access token
   const access_token = botPassword;
 
@@ -85,8 +85,8 @@ async function checkTwitchToken() {
     },
   };
 
-  await https
-    .get(getOptions, (response) => {
+ https
+    .get(getOptions, async (response) => {
       const { statusCode } = response;
       const contentType = response.headers["content-type"];
 
@@ -184,11 +184,7 @@ async function checkTwitchToken() {
     });
 }
 
-try {
-  checkTwitchToken();
-} catch (e) {
-  console.log("1" + e);
-}
+checkTwitchToken();
 
 // When the twitch client connects, run this code
 // twitchClient.on("connecting", async (address, port) => {
