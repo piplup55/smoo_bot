@@ -1,5 +1,9 @@
 const { SlashCommandBuilder } = require("discord.js");
 
+function delay(time) {
+  return new Promise((resolve) => setTimeout(resolve, time));
+}
+
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("multiban")
@@ -42,7 +46,3 @@ module.exports = {
     await interaction.editReply("Banned " + user + " from all channels.");
   },
 };
-
-function delay(time) {
-  return new Promise((resolve) => setTimeout(resolve, time));
-}
