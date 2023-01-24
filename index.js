@@ -1,65 +1,18 @@
 // Require the necessary discord.js classes
 const fs = require("node:fs");
-const path = require("node:path");
 const https = require("https");
 const querystring = require("querystring");
 const { Client, Collection, Events, GatewayIntentBits } = require("discord.js");
-const {
-  token,
-  botUsername,
-  botPassword,
-  twitchClientId,
-  twitchClientSecret,
-  twitchRefreshToken,
-  streamers,
-} = require("./config.json");
 const tmi = require("tmi.js");
-const file = require("./config.json");
 const { exit } = require("node:process");
 
 // Create a new client instance
 const client = new Client({
   intents: [],
 });
-
-// Initialize the discord event files --------------------------------------------
-const eventsPath = path.join(__dirname, "events");
-const eventFiles = fs
-  .readdirSync(eventsPath)
-  .filter((file) => file.endsWith(".js"));
-
-for (const file of eventFiles) {
-  const filePath = path.join(eventsPath, file);
-  const event = require(filePath);
-  if (event.once) {
-    client.once(event.name, (...args) => event.execute(...args));
-  } else {
-    client.on(event.name, (...args) => event.execute(...args));
-  }
-}
-// -----------------------------------------------------------------------
-
-// Initialize commands ---------------------------------------------------
-client.commands = new Collection();
-
-const commandsPath = path.join(__dirname, "commands");
-const commandFiles = fs
-  .readdirSync(commandsPath)
-  .filter((file) => file.endsWith(".js"));
-
-for (const file of commandFiles) {
-  const filePath = path.join(commandsPath, file);
-  const command = require(filePath);
-  // Set a new item in the Collection with the key as the command name and the value as the exported module
-  if ("data" in command && "execute" in command) {
-    client.commands.set(command.data.name, command);
-  } else {
-    console.log(
-      `[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`
-    );
-  }
-}
-// -----------------------------------------------------------------------
+client.config = require("./config.json")
+client.function = require("./functions")
+client.commands = new Collection()
 
 // Simple delay function
 function delay(time) {
@@ -72,14 +25,14 @@ function delay(time) {
 function checkTwitchToken() {
   return new Promise((resolve, reject) => {
     // Replace YOUR_ACCESS_TOKEN with the actual access token
-    const access_token = botPassword;
+    const access_token = client.config.twitch.accessToken;
 
     const getOptions = {
       hostname: "id.twitch.tv",
       path: "/oauth2/validate",
       headers: {
-        Authorization: "OAuth " + access_token,
-        "Client-ID": twitchClientId,
+        Authorization: "OAuth " + client.config.twitch.accessToken,
+        "Client-ID": client.config.twitch.clientId,
       },
     };
 
@@ -93,9 +46,9 @@ function checkTwitchToken() {
           error = new Error("Request Failed.\n" + `Status Code: ${statusCode}`);
           console.log("There was an error... Creating a new access token...");
           // Create a post request to get a new access token
-          const client_id = twitchClientId;
-          const client_secret = twitchClientSecret;
-          const refresh_token = twitchRefreshToken;
+          const client_id = client.config.twitch.clientId;
+          const client_secret = client.config.twitch.clientSecret;
+          const refresh_token = client.config.twitch.refreshToken;
 
           const data = querystring.stringify({
             client_id: client_id,
@@ -191,10 +144,10 @@ const init = async () => {
 
   const opts = {
     identity: {
-      username: botUsername,
+      username: client.config.twitch.username,
       password: access_token,
     },
-    channels: streamers,
+    channels: client.config.twitch.streamers,
     reconnectInterval: 5000,
   };
 
@@ -236,7 +189,7 @@ const init = async () => {
   client.twitchClient = twitchClient;
 
   // Log in to Discord with your client's token
-  client.login(token);
+  client.login(client.config.discord.token).then(() => { client.function.loadEvents(client); client.function.loadCommands(client) })
 };
 
 init();
