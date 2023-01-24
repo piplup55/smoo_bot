@@ -61,7 +61,6 @@ function loadEvents(client) {
 
 function checkTwitchToken(client) {
   return new Promise((resolve, reject) => {
-    // Replace YOUR_ACCESS_TOKEN with the actual access token
     const access_token = client.config.twitch.accessToken;
 
     const getOptions = {
