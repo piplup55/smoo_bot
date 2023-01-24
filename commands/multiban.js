@@ -1,9 +1,5 @@
 const { SlashCommandBuilder } = require("discord.js");
 
-function delay(time) {
-  return new Promise((resolve) => setTimeout(resolve, time));
-}
-
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("multiban")
@@ -17,7 +13,7 @@ module.exports = {
         .setDescription("The reason for the ban")
         .setRequired(false)
     ),
-  async execute(interaction) {
+  async execute(interaction, client) {
     await interaction.deferReply();
     const user = interaction.options.getString("user");
 
@@ -41,7 +37,7 @@ module.exports = {
         .catch((err) => {
           console.log("Error: " + err);
         });
-      await delay(1000);
+      await client.functions.delay(1000);
     }
     await interaction.editReply("Banned " + user + " from all channels.");
   },

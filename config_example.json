@@ -1,0 +1,15 @@
+{
+    "discord": {
+      "token": "",
+      "clientId": "",
+      "guildId": ""
+    },
+    "twitch": {
+      "username": "",
+      "accessToken": "",
+      "refreshToken": "",
+      "clientId": "",
+      "clientSecret": "",
+      "streamers": []
+    }
+  }

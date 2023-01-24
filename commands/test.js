@@ -1,16 +1,12 @@
 const { SlashCommandBuilder } = require("discord.js");
 
-function delay(time) {
-  return new Promise((resolve) => setTimeout(resolve, time));
-}
-
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("test")
     .setDescription(
       "Test connection to twitch chat for all streamers in the list."
     ),
-  async execute(interaction) {
+  async execute(interaction, client) {
     await interaction.deferReply();
     const client = interaction.client.twitchClient;
     channels = client.channels;
@@ -23,7 +19,7 @@ module.exports = {
         .catch((err) => {
           console.log("Error: " + err);
         });
-      await delay(1000);
+      await client.functions.delay(1000);
     }
     await interaction.editReply("Sent messages to all channels.");
   },

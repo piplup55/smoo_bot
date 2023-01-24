@@ -1,4 +1,5 @@
 const { Events } = require("discord.js");
+const { gettime } = require("../functions.js")
 
 module.exports = {
   name: Events.InteractionCreate,
@@ -8,26 +9,16 @@ module.exports = {
     const command = interaction.client.commands.get(interaction.commandName);
 
     if (!command) {
-      console.error(
-        `No command matching ${interaction.commandName} was found.`
-      );
-      return;
+      return console.error(`No command matching ${interaction.commandName} was found.`);
     }
 
     try {
       await command.execute(interaction);
     } catch (error) {
-      console.error(`Error executing ${interaction.commandName}`);
+      console.error(`${gettime()} Error executing ${interaction.commandName}`);
       console.error(error);
     }
 
-    console.log(
-      interaction.user.username +
-        "#" +
-        interaction.user.discriminator +
-        " used the " +
-        interaction.commandName +
-        " command."
-    );
+    console.log(`${gettime()} ${interaction.user.tag} used the ${interaction.commandName} command.`);
   },
 };
